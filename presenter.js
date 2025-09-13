@@ -1,3 +1,5 @@
+// presenter.js (Archivo en el raíz del proyecto)
+
 // Importar clases de modelos
 import { Cliente } from './src/models/Cliente.js';
 import { Producto } from './src/models/Producto.js';
@@ -5,7 +7,7 @@ import { ItemVenta } from './src/models/ItemVenta.js';
 import { Venta } from './src/models/Venta.js';
 import { Tienda } from './src/models/Tienda.js';
 import { Factura } from './src/models/Factura.js';
-import { CreadorPagoCash } from './src/models/CreadorDePagoCash.js';
+import { CreadorPagoCash } from './src/models/CreadorDePagoCash.js'; // Asegúrate que el nombre del archivo sea CreadorDePagoCash.js
 import { CreadorPagoTarjeta } from './src/models/CreadorPagoTarjeta.js';
 // Se elimina la importación de CreadorPagoQR
 
@@ -19,7 +21,7 @@ import { TiendaService } from './src/services/TiendaService.js';
  * Este archivo actúa como el 'presenter' o el punto de entrada de la aplicación.
  */
 function simularCompraYFactura() {
-    console.log("--- Iniciando Simulación de Compra y Factura (Presenter) ---");
+    console.log("--- Iniciando Simulación de Compra y Factura (Presenter en Navegador) ---");
 
     // 1. Obtener datos de Cliente, Productos y Tienda desde los servicios (simulando backend)
     const cliente = ClienteService.obtenerClientePorId("C001");
@@ -79,8 +81,6 @@ function simularCompraYFactura() {
 
     console.log("\n--- Factura Generada ---");
     console.log(factura.obtenerDetalles());
-
-    // Se elimina el ejemplo de "Nueva Venta con Pago QR"
 }
 
 // Ejecutar la simulación

@@ -5,7 +5,7 @@
   "main": "presenter.js",
   "type": "module",
   "scripts": {
-    "start": "node presenter.js", 
+    "start": "http-server -o -c-1",         
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,4 +19,8 @@
     "url": "https://github.com/AlessanderMorales/ImpresionFacturaV2/issues"
   },
   "homepage": "https://github.com/AlessanderMorales/ImpresionFacturaV2#readme"
+  ,
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
 }
