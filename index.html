@@ -29,11 +29,37 @@
                 </div>
             </div>
 
-           
+             <div>
+                <div class="section">
+                    <h2>Datos del Cliente</h2>
+                    <p id="cliente-info">Cargando...</p>
+                </div>
+
+                <div class="section payment-options" style="margin-top: 20px;">
+                    <h2>Método de Pago</h2>
+                    <label>
+                        <input type="radio" name="metodoPago" value="cash" checked> Efectivo
+                    </label>
+                    <label>
+                        <input type="radio" name="metodoPago" value="tarjeta"> Tarjeta de Crédito/Débito
+                    </label>
+                    <div id="tarjeta-info" style="display: none;">
+                        <input type="text" id="numeroTarjeta" placeholder="Ingrese número de tarjeta">
+                    </div>
+                </div>
+ <div>
+                
+                <button id="btn-generar-factura">Generar Factura</button>
+
+                <div id="factura-container" class="section" style="margin-top: 20px; display: none;">
+                    <h2>Factura Generada</h2>
+                    <pre id="factura-resultado"></pre>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Asegúrate que la ruta a tu script principal sea correcta -->
     <script type="module" src="./presenter.js"></script>
 </body>
 </html>
+       
