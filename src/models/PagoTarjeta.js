@@ -1,6 +1,6 @@
 import { Pago } from './Pago.js';
 
-class PagoTarjeta extends Pago {
+export class PagoTarjeta extends Pago {
 
     constructor(monto, montoEnLetras, numeroTarjeta) {
         super(monto, montoEnLetras);

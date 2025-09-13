@@ -1,0 +1,22 @@
+{
+  "name": "impresionfacturav2-main",
+  "version": "1.0.0",
+  "description": "Sistema de impresión de factura con Factory Method y principios SOLID.",
+  "main": "presenter.js",
+  "type": "module",
+  "scripts": {
+    "start": "node presenter.js", 
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlessanderMorales/ImpresionFacturaV2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlessanderMorales/ImpresionFacturaV2/issues"
+  },
+  "homepage": "https://github.com/AlessanderMorales/ImpresionFacturaV2#readme"
+}

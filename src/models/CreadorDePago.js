@@ -1,4 +1,4 @@
-class CreadorDePago {
+export class CreadorDePago {
     constructor() {
         if (new.target === CreadorDePago) {
             throw new Error("La clase 'CreadorDePago' es abstracta y no puede ser instanciada directamente.");
