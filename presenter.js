@@ -46,6 +46,8 @@ function renderizarProductos() {
     });
 }
 
+
+
 function agregarAlCarrito(producto) {
     const itemVenta = new ItemVenta(1, producto);
     carrito.agregarItem(itemVenta);
