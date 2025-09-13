@@ -1,3 +1,4 @@
+import { Pago } from './Pago.js';
 class PagoCash extends Pago {
     constructor(monto, montoEnLetras) {
         super(monto, montoEnLetras);

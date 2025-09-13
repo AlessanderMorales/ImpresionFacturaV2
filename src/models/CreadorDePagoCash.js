@@ -1,3 +1,6 @@
+import { CreadorDePago } from './CreadorDePago.js';
+import { PagoCash } from './PagoCash.js';
+
 class CreadorPagoCash extends CreadorDePago {
     constructor(monto, montoEnLetras) {
         super();

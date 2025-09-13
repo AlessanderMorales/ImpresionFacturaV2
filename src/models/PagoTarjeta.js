@@ -1,3 +1,5 @@
+import { Pago } from './Pago.js';
+
 class PagoTarjeta extends Pago {
 
     constructor(monto, montoEnLetras, numeroTarjeta) {
