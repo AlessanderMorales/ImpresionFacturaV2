@@ -1,7 +1,8 @@
 import { Venta } from "./Venta.js";
-import { Pago } from "./Pago.js"; // Importa la clase abstracta Pago
+import { Pago } from "./Pago.js";
 import { Tienda } from "./Tienda.js";
-import { Cliente } from "./Cliente.js"; // Importa la clase Cliente
+import { Cliente } from "./Cliente.js";
+
 export class Factura {
   constructor(numero_factura, fecha, venta, pago, tienda, cliente) {
     if (typeof numero_factura !== 'number' || numero_factura <= 0) throw new Error("Número de factura inválido.");

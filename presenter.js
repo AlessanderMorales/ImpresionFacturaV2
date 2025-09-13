@@ -1,87 +1,139 @@
-// presenter.js (Archivo en el raíz del proyecto)
-
-// Importar clases de modelos
-import { Cliente } from './src/models/Cliente.js';
-import { Producto } from './src/models/Producto.js';
 import { ItemVenta } from './src/models/ItemVenta.js';
 import { Venta } from './src/models/Venta.js';
-import { Tienda } from './src/models/Tienda.js';
 import { Factura } from './src/models/Factura.js';
-import { CreadorPagoCash } from './src/models/CreadorDePagoCash.js'; // Asegúrate que el nombre del archivo sea CreadorDePagoCash.js
+import { CreadorDePagoCash } from './src/models/CreadorDePagoCash.js';
 import { CreadorPagoTarjeta } from './src/models/CreadorPagoTarjeta.js';
-// Se elimina la importación de CreadorPagoQR
 
-// Importar servicios
 import { ClienteService } from './src/services/ClienteService.js';
 import { ProductoService } from './src/services/ProductoService.js';
 import { TiendaService } from './src/services/TiendaService.js';
 
-/**
- * Función principal para simular una compra y generar una factura.
- * Este archivo actúa como el 'presenter' o el punto de entrada de la aplicación.
- */
-function simularCompraYFactura() {
-    console.log("--- Iniciando Simulación de Compra y Factura (Presenter en Navegador) ---");
 
-    // 1. Obtener datos de Cliente, Productos y Tienda desde los servicios (simulando backend)
+const carrito = new Venta();
+let productosDisponibles = []; 
+
+const productListDiv = document.getElementById('product-list');
+const cartItemsDiv = document.getElementById('cart-items');
+const cartTotalDiv = document.getElementById('cart-total');
+const clienteInfoP = document.getElementById('cliente-info');
+const btnGenerarFactura = document.getElementById('btn-generar-factura');
+const facturaContainer = document.getElementById('factura-container');
+const facturaResultadoPre = document.getElementById('factura-resultado');
+const tarjetaInfoDiv = document.getElementById('tarjeta-info');
+
+function renderizarProductos() {
+    productosDisponibles = ProductoService.obtenerTodosLosProductos();
+    productListDiv.innerHTML = ''; 
+    
+    productosDisponibles.forEach(producto => {
+        const productoHTML = `
+            <div class="cart-item">
+                <span>${producto.nombre} - <b>Bs. ${producto.precio.toFixed(2)}</b></span>
+                <button data-product-id="${producto.id}">Agregar al Carrito</button>
+            </div>
+        `;
+        productListDiv.innerHTML += productoHTML;
+    });
+
+    document.querySelectorAll('[data-product-id]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const productId = parseInt(e.target.dataset.productId, 10);
+            const productoAAgregar = productosDisponibles.find(p => p.id === productId);
+            if (productoAAgregar) {
+                agregarAlCarrito(productoAAgregar);
+            }
+        });
+    });
+}
+
+function agregarAlCarrito(producto) {
+    const itemVenta = new ItemVenta(1, producto);
+    carrito.agregarItem(itemVenta);
+    renderizarCarrito();
+}
+
+function renderizarCarrito() {
+    if (carrito.items.length === 0) {
+        cartItemsDiv.innerHTML = '<p>El carrito está vacío.</p>';
+    } else {
+        cartItemsDiv.innerHTML = '';
+        carrito.items.forEach(item => {
+            const itemHTML = `
+                <div class="cart-item">
+                    <span>${item.cantidad}x ${item.producto.nombre}</span>
+                    <span>Bs. ${item.subtotal.toFixed(2)}</span>
+                </div>
+            `;
+            cartItemsDiv.innerHTML += itemHTML;
+        });
+    }
+    const total = carrito.calcularTotal();
+    cartTotalDiv.textContent = `Total: Bs. ${total.toFixed(2)}`;
+}
+
+function cargarDatosIniciales() {
     const cliente = ClienteService.obtenerClientePorId("C001");
-    const producto1 = ProductoService.obtenerProductoPorId(101); // Laptop Gamer
-    const producto2 = ProductoService.obtenerProductoPorId(103); // Mouse Inalámbrico
-    const tienda = TiendaService.obtenerTiendaPorNombre("TecnoOutlet Central");
+    if (cliente) {
+        clienteInfoP.textContent = `Nombre: ${cliente.nombreYApellido} - NIT: ${cliente.nit}`;
+    }
+}
 
-    if (!cliente || !producto1 || !producto2 || !tienda) {
-        console.error("Error: No se pudieron obtener todos los datos necesarios para la simulación.");
+document.querySelectorAll('input[name="metodoPago"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        tarjetaInfoDiv.style.display = e.target.value === 'tarjeta' ? 'block' : 'none';
+    });
+});
+
+btnGenerarFactura.addEventListener('click', () => {
+    if (carrito.items.length === 0) {
+        alert("El carrito está vacío. Agregue productos antes de generar la factura.");
         return;
     }
 
-    console.log("\nDatos recuperados:");
-    console.log("Cliente:", cliente);
-    console.log("Producto 1:", producto1);
-    console.log("Producto 2:", producto2);
-    console.log("Tienda:", tienda);
+    const cliente = ClienteService.obtenerClientePorId("C001");
+    const tienda = TiendaService.obtenerTiendaPorNombre("TecnoOutlet Central");
+    const totalVenta = carrito.calcularTotal();
 
-    // 2. Crear ítems de venta
-    const itemVenta1 = new ItemVenta(1, producto1);
-    const itemVenta2 = new ItemVenta(2, producto2);
-
-    // 3. Crear una venta y agregar ítems
-    const venta = new Venta();
-    venta.agregarItem(itemVenta1);
-    venta.agregarItem(itemVenta2);
-
-    console.log("\nDetalles de la Venta:");
-    venta.items.forEach(item => console.log(`- ${item.cantidad}x ${item.producto.nombre} @ ${item.producto.precio} = ${item.subtotal}`));
-    console.log(`Total de la Venta: ${venta.calcularTotal().toFixed(2)}`);
-
-    // 4. Crear un pago utilizando el Factory Method (Ejemplo con Tarjeta)
+    const metodoPagoSeleccionado = document.querySelector('input[name="metodoPago"]:checked').value;
     let creadorPago;
-    let pagoRealizado;
 
-    // Puedes elegir entre PagoCash o PagoTarjeta
-    creadorPago = new CreadorPagoTarjeta(venta.calcularTotal(), "Trescientos cincuenta y ocho con cero cero", "4111222233334444");
-    // O si prefieres en efectivo:
-    // creadorPago = new CreadorPagoCash(venta.calcularTotal(), "Trescientos cincuenta y ocho con cero cero");
+    if (metodoPagoSeleccionado === 'tarjeta') {
+        const numeroTarjeta = document.getElementById('numeroTarjeta').value;
+        try {
+            creadorPago = new CreadorPagoTarjeta(totalVenta, "Monto en letras (ejemplo)", numeroTarjeta);
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+            return;
+        }
+    } else { 
+        creadorPago = new CreadorDePagoCash(totalVenta, "Monto en letras (ejemplo)");
+    }
 
-    pagoRealizado = creadorPago.crearPago();
-    console.log("\n--- Pago Realizado ---");
-    console.log(pagoRealizado.realizarPago());
+    try {
+        const pagoRealizado = creadorPago.crearPago();
 
-    // 5. Crear la Factura
-    const fechaActual = new Date();
-    const numeroFactura = 20250913001; // Ejemplo de número de factura
+        const factura = new Factura(
+            Math.floor(Date.now() / 1000), 
+            new Date(),
+            carrito,
+            pagoRealizado,
+            tienda,
+            cliente
+        );
 
-    const factura = new Factura(
-        numeroFactura,
-        fechaActual,
-        venta,
-        pagoRealizado, // Aquí pasamos el objeto Pago ya creado
-        tienda,
-        cliente
-    );
+        const detallesFactura = factura.obtenerDetalles();
+        facturaResultadoPre.textContent = JSON.stringify(detallesFactura, null, 2);
+        facturaContainer.style.display = 'block';
 
-    console.log("\n--- Factura Generada ---");
-    console.log(factura.obtenerDetalles());
-}
+    } catch (error) {
+        alert(`Error al generar la factura: ${error.message}`);
+        console.error(error);
+    }
+});
 
-// Ejecutar la simulación
-simularCompraYFactura();
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("--- Interfaz de Facturación Iniciada ---");
+    cargarDatosIniciales();
+    renderizarProductos();
+    renderizarCarrito();
+});

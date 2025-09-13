@@ -1,7 +1,8 @@
 import { CreadorDePago } from './CreadorDePago.js';
 import { PagoCash } from './PagoCash.js';
-import { CreadorPagoCash } from './src/models/CreadorPagoCash.js';
-export class CreadorPagoCash extends CreadorDePago {
+
+
+export class CreadorDePagoCash extends CreadorDePago {
     constructor(monto, montoEnLetras) {
         super();
         this.monto = monto;
