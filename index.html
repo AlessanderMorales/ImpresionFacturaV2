@@ -3,11 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación de Facturación (Navegador)</title>
+    <title>Generador de Facturas</title>
+    
 </head>
 <body>
-    <h1>Consulta la consola del navegador para ver la simulación de facturación.</h1>
-    <p>Este ejemplo se ejecuta directamente en el navegador.</p>
+    <div class="container">
+        <h1>Sistema de Facturación</h1>
+        
+        <div class="grid">
+            <!-- Columna Izquierda: Productos y Carrito -->
+            <div>
+                <div class="section">
+                    <h2>Productos Disponibles</h2>
+                    <div id="product-list" class="product-list">
+                        <!-- Los productos se cargarán aquí desde JS -->
+                    </div>
+                </div>
+
+                <div class="section" style="margin-top: 20px;">
+                    <h2>Carrito de Compras</h2>
+                    <div id="cart-items">
+                        <p>El carrito está vacío.</p>
+                    </div>
+                    <div id="cart-total">Total: Bs. 0.00</div>
+                </div>
+            </div>
+
+           
+        </div>
+    </div>
+
+    <!-- Asegúrate que la ruta a tu script principal sea correcta -->
     <script type="module" src="./presenter.js"></script>
 </body>
 </html>
