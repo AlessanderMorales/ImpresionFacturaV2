@@ -100,6 +100,27 @@
         .product-form button:hover {
             background-color: #218838;
         }
+        /* Styles for invoice list in admin */
+        #admin-invoice-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        #admin-invoice-list li.invoice-item {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        #admin-invoice-list li .invoice-details {
+            margin-top: 10px;
+        }
+        #admin-invoice-list li pre {
+            background-color: #eef;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +172,22 @@
                 <button id="btn-cancelar-edicion" style="background-color: #f39c12; display: none;">Cancelar Edición</button>
             </div>
         </div>
+
+        <!-- NEW SECTION: Administración de Facturas -->
+        <div class="admin-section">
+            <h2>Gestión de Facturas</h2>
+            <div>
+                <label for="admin-invoice-search-input">Buscar Facturas (por NIT/CI de cliente, No. Factura, Nombre de Cliente):</label>
+                <input type="text" id="admin-invoice-search-input" placeholder="Ej: 1234567, Juan Pérez, 167890">
+                <button id="btn-search-admin-invoices" style="background-color: #28a745;">Buscar Facturas</button>
+                <button id="btn-show-all-admin-invoices" style="background-color: #007bff;">Mostrar Todas</button>
+            </div>
+            <div id="admin-invoice-list" style="margin-top: 20px;">
+                <!-- Las facturas se cargarán aquí -->
+                <p>Use la barra de búsqueda o haga clic en "Mostrar Todas" para ver las facturas.</p>
+            </div>
+        </div>
+
     </div>
 
     <script type="module" src="./adminPresenter.js"></script>

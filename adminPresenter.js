@@ -1,7 +1,9 @@
- import { Producto } from './src/models/Producto.js';
+// adminPresenter.js
+import { Producto } from './src/models/Producto.js';
 import { Tienda } from './src/models/Tienda.js';
 import { ProductoService } from './src/services/ProductoService.js';
 import { TiendaService } from './src/services/TiendaService.js';
+import { FacturaService } from './src/services/FacturaService.js'; // NEW: Import FacturaService
 
 // Elementos de la UI para datos de la tienda
 const adminNombreTiendaInput = document.getElementById('admin-nombre-tienda');
@@ -18,6 +20,13 @@ const adminProductNameInput = document.getElementById('admin-product-name');
 const adminProductPriceInput = document.getElementById('admin-product-price');
 const btnGuardarProducto = document.getElementById('btn-guardar-producto');
 const btnCancelarEdicion = document.getElementById('btn-cancelar-edicion');
+
+// NEW UI elements for invoice administration
+const adminInvoiceSearchInput = document.getElementById('admin-invoice-search-input');
+const btnSearchAdminInvoices = document.getElementById('btn-search-admin-invoices');
+const adminInvoiceListDiv = document.getElementById('admin-invoice-list');
+const btnShowAllAdminInvoices = document.getElementById('btn-show-all-admin-invoices'); // NEW button
+
 
 function cargarDatosTienda() {
     const tienda = TiendaService.obtenerTiendaPorNombre("TecnoOutlet Central"); // Asumiendo una única tienda principal
@@ -39,7 +48,7 @@ function guardarDatosTienda() {
         const nit = parseInt(adminNitInput.value, 10);
 
         const nuevaTienda = new Tienda(nombre_tienda, ubicacion, telefono, codigo_autorizacion, nit);
-        TiendaService.guardarTienda(nuevaTienda); // Este método lo crearemos en TiendaService
+        TiendaService.guardarTienda(nuevaTienda);
         alert('Datos de la tienda guardados exitosamente.');
     } catch (error) {
         alert(`Error al guardar datos de la tienda: ${error.message}`);
@@ -49,7 +58,7 @@ function guardarDatosTienda() {
 
 function renderizarProductosAdmin() {
     productAdminListDiv.innerHTML = '';
-    const productos = ProductoService.obtenerTodosLosProductos(); // Este método ya existe
+    const productos = ProductoService.obtenerTodosLosProductos();
 
     if (productos.length === 0) {
         productAdminListDiv.innerHTML = '<p>No hay productos registrados.</p>';
@@ -91,7 +100,7 @@ function cargarProductoParaEdicion(id) {
 
 function guardarProducto() {
     try {
-        const id = adminProductIdInput.value ? parseInt(adminProductIdInput.value, 10) : 0; // 0 si es nuevo, id si edita
+        const id = adminProductIdInput.value ? parseInt(adminProductIdInput.value, 10) : 0;
         const nombre = adminProductNameInput.value.trim();
         const precio = parseFloat(adminProductPriceInput.value);
 
@@ -100,20 +109,17 @@ function guardarProducto() {
 
         let producto;
         if (id) {
-            // Editando un producto existente
             producto = new Producto(id, nombre, precio);
-            ProductoService.actualizarProducto(producto); // Este método lo crearemos
+            ProductoService.actualizarProducto(producto);
         } else {
-            // Añadiendo un nuevo producto (generamos un nuevo ID simple)
-            const newId = ProductoService.generarNuevoIdProducto(); // Este método lo crearemos
+            const newId = ProductoService.generarNuevoIdProducto();
             producto = new Producto(newId, nombre, precio);
-            ProductoService.agregarProducto(producto); // Este método lo crearemos
+            ProductoService.agregarProducto(producto);
         }
         
         alert('Producto guardado exitosamente.');
         limpiarFormularioProducto();
         renderizarProductosAdmin();
-        // Disparar un evento para que la vista de facturación se actualice si está abierta
         window.dispatchEvent(new Event('productosActualizados')); 
 
     } catch (error) {
@@ -124,10 +130,15 @@ function guardarProducto() {
 
 function eliminarProducto(id) {
     if (confirm(`¿Está seguro de que desea eliminar el producto con ID ${id}?`)) {
-        ProductoService.eliminarProducto(id); // Este método lo crearemos
-        alert('Producto eliminado.');
-        renderizarProductosAdmin();
-        window.dispatchEvent(new Event('productosActualizados'));
+        try {
+            ProductoService.eliminarProducto(id);
+            alert('Producto eliminado.');
+            renderizarProductosAdmin();
+            window.dispatchEvent(new Event('productosActualizados'));
+        } catch (error) {
+            alert(`Error al eliminar el producto: ${error.message}`);
+            console.error(error);
+        }
     }
 }
 
@@ -139,15 +150,84 @@ function limpiarFormularioProducto() {
     btnGuardarProducto.textContent = 'Guardar Producto';
 }
 
+// NEW: Invoice Administration Functions
+
+function renderizarFacturasAdmin(facturas) {
+    adminInvoiceListDiv.innerHTML = ''; // Clear previous results
+
+    if (facturas.length === 0) {
+        adminInvoiceListDiv.innerHTML = '<p>No se encontraron facturas con los criterios de búsqueda.</p>';
+        return;
+    }
+
+    const ul = document.createElement('ul');
+    facturas.forEach(factura => {
+        const li = document.createElement('li');
+        li.className = 'invoice-item';
+        li.innerHTML = `
+            <div>
+                <b>Factura #${factura.numero_factura}</b> - Fecha: ${new Date(factura.fecha).toLocaleDateString()} ${new Date(factura.fecha).toLocaleTimeString()}
+                <br>
+                Cliente: ${factura.cliente.nombreYApellido} (NIT: ${factura.cliente.nit})
+                <br>
+                Total: Bs. ${factura.total.toFixed(2)} (${factura.tipoDePago})
+            </div>
+            <details class="invoice-details">
+                <summary>Ver Detalles Completos</summary>
+                <pre>${JSON.stringify(factura.obtenerDetalles(), null, 2)}</pre>
+            </details>
+        `;
+        ul.appendChild(li);
+    });
+    adminInvoiceListDiv.appendChild(ul);
+}
+
+function buscarFacturasAdmin() {
+    const searchTerm = adminInvoiceSearchInput.value.trim();
+    let facturasFiltradas = [];
+
+    const todasLasFacturas = FacturaService.obtenerTodasLasFacturas();
+
+    if (searchTerm === '') {
+        // If search term is empty, show all invoices
+        facturasFiltradas = todasLasFacturas;
+    } else {
+        // Try to parse as number for NIT search
+        const nitSearch = parseInt(searchTerm, 10);
+        if (!isNaN(nitSearch) && nitSearch > 0) {
+            facturasFiltradas = todasLasFacturas.filter(factura => 
+                factura.cliente.nit === nitSearch
+            );
+        } else {
+            // General text search (e.g., by client name or invoice number string)
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+            facturasFiltradas = todasLasFacturas.filter(factura => 
+                String(factura.numero_factura).includes(lowerCaseSearchTerm) ||
+                factura.cliente.nombreYApellido.toLowerCase().includes(lowerCaseSearchTerm) ||
+                factura.tienda.nombre_tienda.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+        }
+    }
+    renderizarFacturasAdmin(facturasFiltradas);
+}
+
 
 // Event Listeners
 btnGuardarTienda.addEventListener('click', guardarDatosTienda);
 btnGuardarProducto.addEventListener('click', guardarProducto);
 btnCancelarEdicion.addEventListener('click', limpiarFormularioProducto);
 
+// NEW Event Listeners for invoice administration
+btnSearchAdminInvoices.addEventListener('click', buscarFacturasAdmin);
+btnShowAllAdminInvoices.addEventListener('click', () => {
+    adminInvoiceSearchInput.value = ''; // Clear search field
+    buscarFacturasAdmin(); // Show all
+});
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     console.log("--- Interfaz de Administración Iniciada ---");
     cargarDatosTienda();
     renderizarProductosAdmin();
+    buscarFacturasAdmin(); // Load all invoices on initial page load for admin
 });

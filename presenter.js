@@ -1,3 +1,4 @@
+// presenter.js
 import { Cliente } from './src/models/Cliente.js';
 import { ItemVenta } from './src/models/ItemVenta.js';
 import { Venta } from './src/models/Venta.js';
@@ -6,10 +7,9 @@ import { CreadorDePagoCash } from './src/models/CreadorDePagoCash.js';
 import { CreadorPagoTarjeta } from './src/models/CreadorPagoTarjeta.js';
 import { CreadorPagoQR } from './src/models/CreadorPagoQR.js'; 
 
-//import { ClienteService } from './src/services/ClienteService.js';
 import { ProductoService } from './src/services/ProductoService.js';
 import { TiendaService } from './src/services/TiendaService.js';
-
+import { FacturaService } from './src/services/FacturaService.js'; // NEW
 
 const carrito = new Venta();
 let productosDisponibles = []; 
@@ -29,10 +29,21 @@ const qrImage = document.getElementById('qr-image');
 const facturaQrDisplay = document.getElementById('factura-qr-display');
 const facturaQrImage = document.getElementById('factura-qr-image');     
 
+// NEW UI elements for client's past invoices
+const clientPastInvoicesSection = document.getElementById('client-past-invoices-section');
+const clientViewNitInput = document.getElementById('client-view-nit');
+const btnViewClientInvoices = document.getElementById('btn-view-client-invoices');
+const clientInvoicesResultDiv = document.getElementById('client-invoices-result');
+
 function renderizarProductos() {
     productosDisponibles = ProductoService.obtenerTodosLosProductos();
     productListDiv.innerHTML = ''; 
     
+    if (productosDisponibles.length === 0) {
+        productListDiv.innerHTML = '<p>No hay productos disponibles.</p>';
+        return;
+    }
+
     productosDisponibles.forEach(producto => {
         const productoHTML = `
             <div class="cart-item">
@@ -89,7 +100,6 @@ function renderizarCarrito() {
 }
 
 
-
 document.querySelectorAll('input[name="metodoPago"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         tarjetaInfoDiv.style.display = 'none';
@@ -127,15 +137,13 @@ btnGenerarFactura.addEventListener('click', () => {
 
     let cliente;
     try {
-       
-        const clienteId = 'C-' + Date.now(); 
+        const clienteId = 'C-' + nitClienteNum; // Use NIT as part of the ID for consistency if desired
         cliente = new Cliente(clienteId, nombreCliente, nitClienteNum);
     } catch (error) {
         alert(`Error en los datos del cliente: ${error.message}`);
         return;
     }
 
-    // Siempre obtenemos la tienda del servicio, que ahora la carga de localStorage
     const tienda = TiendaService.obtenerTiendaPorNombre("TecnoOutlet Central");
     if (!tienda) {
         alert("Error: No se pudieron cargar los datos de la tienda.");
@@ -143,6 +151,10 @@ btnGenerarFactura.addEventListener('click', () => {
     }
 
     const totalVenta = carrito.calcularTotal();
+    if (totalVenta <= 0) {
+        alert("El total de la venta debe ser mayor a cero.");
+        return;
+    }
 
     const metodoPagoSeleccionado = document.querySelector('input[name="metodoPago"]:checked').value;
     let creadorPago;
@@ -153,7 +165,7 @@ btnGenerarFactura.addEventListener('click', () => {
         try {
             creadorPago = new CreadorPagoTarjeta(totalVenta, montoEnLetras, numeroTarjeta);
         } catch (error) {
-            alert(`Error: ${error.message}`);
+            alert(`Error en el número de tarjeta: ${error.message}`);
             return;
         }
     } else if (metodoPagoSeleccionado === 'qr') { 
@@ -166,13 +178,17 @@ btnGenerarFactura.addEventListener('click', () => {
     try {
         const pagoRealizado = creadorPago.crearPago();
         const factura = new Factura(
-            Math.floor(Date.now() / 1000), 
+            Math.floor(Date.now() / 1000), // Unique invoice number
             new Date(),
             carrito,
             pagoRealizado,
             tienda,
             cliente 
         );
+        
+        // Save the factura to localStorage
+        FacturaService.guardarFactura(factura); // NEW
+
         const detallesFactura = factura.obtenerDetalles();
         facturaResultadoPre.textContent = JSON.stringify(detallesFactura, null, 2);
         facturaContainer.style.display = 'block';
@@ -181,9 +197,47 @@ btnGenerarFactura.addEventListener('click', () => {
         facturaQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(facturaOnlineData)}`;
         facturaQrDisplay.style.display = 'block'; 
 
+        // Clear carrito after successful factura generation
+        carrito.items = [];
+        renderizarCarrito();
+        alert('Factura generada y guardada exitosamente!');
+
     } catch (error) {
         alert(`Error al generar la factura: ${error.message}`);
         console.error(error);
+    }
+});
+
+// NEW: Client-side view past invoices logic
+btnViewClientInvoices.addEventListener('click', () => {
+    const clientNit = parseInt(clientViewNitInput.value.trim(), 10);
+
+    if (isNaN(clientNit) || clientNit <= 0) {
+        alert("Por favor, ingrese un NIT/CI válido para buscar sus facturas.");
+        clientInvoicesResultDiv.innerHTML = '';
+        return;
+    }
+
+    const facturasDelCliente = FacturaService.obtenerFacturasPorClienteNit(clientNit);
+    
+    clientInvoicesResultDiv.innerHTML = ''; // Clear previous results
+
+    if (facturasDelCliente.length === 0) {
+        clientInvoicesResultDiv.innerHTML = `<p>No se encontraron facturas para el NIT/CI ${clientNit}.</p>`;
+    } else {
+        const ul = document.createElement('ul');
+        facturasDelCliente.forEach(factura => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <b>Factura #${factura.numero_factura}</b> - Fecha: ${new Date(factura.fecha).toLocaleDateString()} - Total: Bs. ${factura.total.toFixed(2)}
+                <details>
+                    <summary>Ver Detalles</summary>
+                    <pre>${JSON.stringify(factura.obtenerDetalles(), null, 2)}</pre>
+                </details>
+            `;
+            ul.appendChild(li);
+        });
+        clientInvoicesResultDiv.appendChild(ul);
     }
 });
 
@@ -193,10 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarProductos();
     renderizarCarrito();
 
-    // NUEVO: Escuchar evento de productos actualizados para refrescar la lista
     window.addEventListener('productosActualizados', () => {
         console.log("Productos actualizados desde administración. Refrescando interfaz de facturación.");
-        // Limpiar carrito si los productos se modificaron, para evitar inconsistencias
         carrito.items = []; 
         renderizarProductos();
         renderizarCarrito();
