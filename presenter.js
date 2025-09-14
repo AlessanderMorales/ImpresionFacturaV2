@@ -26,8 +26,8 @@ const tarjetaInfoDiv = document.getElementById('tarjeta-info');
 const qrInfoDiv = document.getElementById('qr-info'); 
 const qrImage = document.getElementById('qr-image');   
 
-const facturaQrDisplay = document.getElementById('factura-qr-display'); // Nuevo: div del QR de la factura
-const facturaQrImage = document.getElementById('factura-qr-image');     // Nuevo: imagen del QR de la factura
+const facturaQrDisplay = document.getElementById('factura-qr-display');
+const facturaQrImage = document.getElementById('factura-qr-image');     
 
 function renderizarProductos() {
     productosDisponibles = ProductoService.obtenerTodosLosProductos();
@@ -55,13 +55,23 @@ function renderizarProductos() {
 }
 
 
-
+// MODIFICADO: Lógica para agregar al carrito, apilando ítems iguales
 function agregarAlCarrito(producto) {
-    const itemVenta = new ItemVenta(1, producto);
-    carrito.agregarItem(itemVenta);
+    const itemExistente = carrito.items.find(item => item.producto.id === producto.id);
+
+    if (itemExistente) {
+        // Si el producto ya está en el carrito, incrementa la cantidad
+        itemExistente.cantidad++;
+        itemExistente.subtotal = itemExistente.calcularSubtotal(); // Recalcula el subtotal
+    } else {
+        // Si no está, crea un nuevo ItemVenta
+        const itemVenta = new ItemVenta(1, producto);
+        carrito.agregarItem(itemVenta);
+    }
     renderizarCarrito();
 }
 
+// MODIFICADO: Renderizar carrito para mostrar cantidad y subtotal por ítem
 function renderizarCarrito() {
     if (carrito.items.length === 0) {
         cartItemsDiv.innerHTML = '<p>El carrito está vacío.</p>';
@@ -70,7 +80,7 @@ function renderizarCarrito() {
         carrito.items.forEach(item => {
             const itemHTML = `
                 <div class="cart-item">
-                    <span>${item.cantidad}x ${item.producto.nombre}</span>
+                    <span>${item.cantidad}x ${item.producto.nombre} (Bs. ${item.producto.precio.toFixed(2)} c/u)</span>
                     <span>Bs. ${item.subtotal.toFixed(2)}</span>
                 </div>
             `;
@@ -164,10 +174,9 @@ btnGenerarFactura.addEventListener('click', () => {
         facturaResultadoPre.textContent = JSON.stringify(detallesFactura, null, 2);
         facturaContainer.style.display = 'block';
 
-        // NUEVO: Generar y mostrar el QR de la factura online
         const facturaOnlineData = `FacturaID:${factura.numero_factura}-Cliente:${cliente.id}-Total:${factura.total.toFixed(2)}`;
         facturaQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(facturaOnlineData)}`;
-        facturaQrDisplay.style.display = 'block'; // Mostrar el contenedor del QR de la factura
+        facturaQrDisplay.style.display = 'block'; 
 
     } catch (error) {
         alert(`Error al generar la factura: ${error.message}`);
