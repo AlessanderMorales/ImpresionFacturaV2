@@ -55,23 +55,20 @@ function renderizarProductos() {
 }
 
 
-// MODIFICADO: Lógica para agregar al carrito, apilando ítems iguales
 function agregarAlCarrito(producto) {
     const itemExistente = carrito.items.find(item => item.producto.id === producto.id);
 
     if (itemExistente) {
-        // Si el producto ya está en el carrito, incrementa la cantidad
         itemExistente.cantidad++;
-        itemExistente.subtotal = itemExistente.calcularSubtotal(); // Recalcula el subtotal
+        itemExistente.subtotal = itemExistente.calcularSubtotal();
     } else {
-        // Si no está, crea un nuevo ItemVenta
         const itemVenta = new ItemVenta(1, producto);
         carrito.agregarItem(itemVenta);
     }
     renderizarCarrito();
 }
 
-// MODIFICADO: Renderizar carrito para mostrar cantidad y subtotal por ítem
+
 function renderizarCarrito() {
     if (carrito.items.length === 0) {
         cartItemsDiv.innerHTML = '<p>El carrito está vacío.</p>';
@@ -138,7 +135,13 @@ btnGenerarFactura.addEventListener('click', () => {
         return;
     }
 
+    // Siempre obtenemos la tienda del servicio, que ahora la carga de localStorage
     const tienda = TiendaService.obtenerTiendaPorNombre("TecnoOutlet Central");
+    if (!tienda) {
+        alert("Error: No se pudieron cargar los datos de la tienda.");
+        return;
+    }
+
     const totalVenta = carrito.calcularTotal();
 
     const metodoPagoSeleccionado = document.querySelector('input[name="metodoPago"]:checked').value;
@@ -189,4 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("--- Interfaz de Facturación Iniciada ---");
     renderizarProductos();
     renderizarCarrito();
+
+    // NUEVO: Escuchar evento de productos actualizados para refrescar la lista
+    window.addEventListener('productosActualizados', () => {
+        console.log("Productos actualizados desde administración. Refrescando interfaz de facturación.");
+        // Limpiar carrito si los productos se modificaron, para evitar inconsistencias
+        carrito.items = []; 
+        renderizarProductos();
+        renderizarCarrito();
+    });
 });

@@ -25,6 +25,24 @@
             border-bottom: 2px solid #11780d;
             padding-bottom: 10px;
         }
+        /* Nuevo estilo para los botones de navegación */
+        .nav-buttons {
+            margin-bottom: 20px;
+        }
+        .nav-buttons button {
+            background-color: #0b721e; /* Color verde */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        .nav-buttons button:hover {
+            background-color: #085a17; /* Verde más oscuro al pasar el ratón */
+        }
+
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -113,6 +131,12 @@
 </head>
 <body>
     <div class="container">
+        <!-- BOTONES DE NAVEGACIÓN AÑADIDOS AQUÍ -->
+        <div class="nav-buttons">
+            <button onclick="window.location.href='index.html'">Volver a Facturación</button>
+            <button onclick="window.location.href='admin.html'">Administración</button>
+        </div>
+
         <h1>Sistema de Facturación</h1>
         
         <div class="grid">
