@@ -4,6 +4,7 @@ import { Venta } from './src/models/Venta.js';
 import { Factura } from './src/models/Factura.js';
 import { CreadorDePagoCash } from './src/models/CreadorDePagoCash.js';
 import { CreadorPagoTarjeta } from './src/models/CreadorPagoTarjeta.js';
+import { CreadorPagoQR } from './src/models/CreadorPagoQR.js'; // Importa la nueva clase
 
 //import { ClienteService } from './src/services/ClienteService.js';
 import { ProductoService } from './src/services/ProductoService.js';
@@ -22,6 +23,8 @@ const btnGenerarFactura = document.getElementById('btn-generar-factura');
 const facturaContainer = document.getElementById('factura-container');
 const facturaResultadoPre = document.getElementById('factura-resultado');
 const tarjetaInfoDiv = document.getElementById('tarjeta-info');
+const qrInfoDiv = document.getElementById('qr-info'); // Nuevo: div para info del QR
+const qrImage = document.getElementById('qr-image');   // Nuevo: imagen del QR
 
 function renderizarProductos() {
     productosDisponibles = ProductoService.obtenerTodosLosProductos();
@@ -79,7 +82,18 @@ function renderizarCarrito() {
 
 document.querySelectorAll('input[name="metodoPago"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
-        tarjetaInfoDiv.style.display = e.target.value === 'tarjeta' ? 'block' : 'none';
+        tarjetaInfoDiv.style.display = 'none';
+        qrInfoDiv.style.display = 'none'; // Ocultar QR por defecto
+
+        if (e.target.value === 'tarjeta') {
+            tarjetaInfoDiv.style.display = 'block';
+        } else if (e.target.value === 'qr') {
+            // Generar un QR ficticio para la demostración
+            // En un escenario real, esto sería una llamada a un servicio
+            const totalActual = carrito.calcularTotal().toFixed(2);
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Pago%20Bs.${totalActual}-Ref-${Date.now()}`;
+            qrInfoDiv.style.display = 'block';
+        }
     });
 });
 
@@ -118,16 +132,21 @@ btnGenerarFactura.addEventListener('click', () => {
 
     const metodoPagoSeleccionado = document.querySelector('input[name="metodoPago"]:checked').value;
     let creadorPago;
+    let montoEnLetras = "Monto en letras (ejemplo)"; // Podrías implementar una conversión a letras aquí
+
     if (metodoPagoSeleccionado === 'tarjeta') {
         const numeroTarjeta = document.getElementById('numeroTarjeta').value;
         try {
-            creadorPago = new CreadorPagoTarjeta(totalVenta, "Monto en letras (ejemplo)", numeroTarjeta);
+            creadorPago = new CreadorPagoTarjeta(totalVenta, montoEnLetras, numeroTarjeta);
         } catch (error) {
             alert(`Error: ${error.message}`);
             return;
         }
-    } else { 
-        creadorPago = new CreadorPagoCash(totalVenta, "Monto en letras (ejemplo)");
+    } else if (metodoPagoSeleccionado === 'qr') { // Nuevo: Lógica para QR
+        creadorPago = new CreadorPagoQR(totalVenta, montoEnLetras);
+    }
+    else { // Pago en efectivo por defecto
+        creadorPago = new CreadorDePagoCash(totalVenta, montoEnLetras);
     }
 
     try {
