@@ -4,7 +4,7 @@ import { Venta } from './src/models/Venta.js';
 import { Factura } from './src/models/Factura.js';
 import { CreadorDePagoCash } from './src/models/CreadorDePagoCash.js';
 import { CreadorPagoTarjeta } from './src/models/CreadorPagoTarjeta.js';
-import { CreadorPagoQR } from './src/models/CreadorPagoQR.js'; // Importa la nueva clase
+import { CreadorPagoQR } from './src/models/CreadorPagoQR.js'; 
 
 //import { ClienteService } from './src/services/ClienteService.js';
 import { ProductoService } from './src/services/ProductoService.js';
@@ -23,8 +23,11 @@ const btnGenerarFactura = document.getElementById('btn-generar-factura');
 const facturaContainer = document.getElementById('factura-container');
 const facturaResultadoPre = document.getElementById('factura-resultado');
 const tarjetaInfoDiv = document.getElementById('tarjeta-info');
-const qrInfoDiv = document.getElementById('qr-info'); // Nuevo: div para info del QR
-const qrImage = document.getElementById('qr-image');   // Nuevo: imagen del QR
+const qrInfoDiv = document.getElementById('qr-info'); 
+const qrImage = document.getElementById('qr-image');   
+
+const facturaQrDisplay = document.getElementById('factura-qr-display'); // Nuevo: div del QR de la factura
+const facturaQrImage = document.getElementById('factura-qr-image');     // Nuevo: imagen del QR de la factura
 
 function renderizarProductos() {
     productosDisponibles = ProductoService.obtenerTodosLosProductos();
@@ -83,13 +86,11 @@ function renderizarCarrito() {
 document.querySelectorAll('input[name="metodoPago"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
         tarjetaInfoDiv.style.display = 'none';
-        qrInfoDiv.style.display = 'none'; // Ocultar QR por defecto
+        qrInfoDiv.style.display = 'none'; 
 
         if (e.target.value === 'tarjeta') {
             tarjetaInfoDiv.style.display = 'block';
         } else if (e.target.value === 'qr') {
-            // Generar un QR ficticio para la demostración
-            // En un escenario real, esto sería una llamada a un servicio
             const totalActual = carrito.calcularTotal().toFixed(2);
             qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Pago%20Bs.${totalActual}-Ref-${Date.now()}`;
             qrInfoDiv.style.display = 'block';
@@ -132,7 +133,7 @@ btnGenerarFactura.addEventListener('click', () => {
 
     const metodoPagoSeleccionado = document.querySelector('input[name="metodoPago"]:checked').value;
     let creadorPago;
-    let montoEnLetras = "Monto en letras (ejemplo)"; // Podrías implementar una conversión a letras aquí
+    let montoEnLetras = "Monto en letras (ejemplo)"; 
 
     if (metodoPagoSeleccionado === 'tarjeta') {
         const numeroTarjeta = document.getElementById('numeroTarjeta').value;
@@ -142,10 +143,10 @@ btnGenerarFactura.addEventListener('click', () => {
             alert(`Error: ${error.message}`);
             return;
         }
-    } else if (metodoPagoSeleccionado === 'qr') { // Nuevo: Lógica para QR
+    } else if (metodoPagoSeleccionado === 'qr') { 
         creadorPago = new CreadorPagoQR(totalVenta, montoEnLetras);
     }
-    else { // Pago en efectivo por defecto
+    else { 
         creadorPago = new CreadorDePagoCash(totalVenta, montoEnLetras);
     }
 
@@ -162,6 +163,12 @@ btnGenerarFactura.addEventListener('click', () => {
         const detallesFactura = factura.obtenerDetalles();
         facturaResultadoPre.textContent = JSON.stringify(detallesFactura, null, 2);
         facturaContainer.style.display = 'block';
+
+        // NUEVO: Generar y mostrar el QR de la factura online
+        const facturaOnlineData = `FacturaID:${factura.numero_factura}-Cliente:${cliente.id}-Total:${factura.total.toFixed(2)}`;
+        facturaQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(facturaOnlineData)}`;
+        facturaQrDisplay.style.display = 'block'; // Mostrar el contenedor del QR de la factura
+
     } catch (error) {
         alert(`Error al generar la factura: ${error.message}`);
         console.error(error);

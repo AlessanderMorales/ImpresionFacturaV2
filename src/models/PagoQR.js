@@ -3,7 +3,7 @@ import { Pago } from './Pago.js';
 export class PagoQR extends Pago {
     constructor(monto, montoEnLetras, codigoQR = null) {
         super(monto, montoEnLetras);
-        this.codigoQR = codigoQR || this.generarQR(); // Genera un QR si no se provee uno
+        this.codigoQR = codigoQR || this.generarQR(); 
     }
 
     generarQR() {

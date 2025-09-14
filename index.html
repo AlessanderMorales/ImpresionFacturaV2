@@ -94,6 +94,21 @@
             white-space: pre-wrap;
             font-family: 'Courier New', Courier, monospace;
         }
+        /* Estilos para el QR de la factura */
+        #factura-qr-display {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        #factura-qr-image {
+            width: 120px;
+            height: 120px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: white;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -158,6 +173,11 @@
                 <div id="factura-container" class="section" style="margin-top: 20px; display: none;">
                     <h2>Factura Generada</h2>
                     <pre id="factura-resultado"></pre>
+                    <div id="factura-qr-display" style="display: none;">
+                        <p>Escanee este QR para ver la factura online:</p>
+                        <img id="factura-qr-image" src="" alt="QR Factura Online">
+                        <p style="font-size: 0.8em; color: #777;">(QR ficticio de factura online)</p>
+                    </div>
                 </div>
             </div>
         </div>
