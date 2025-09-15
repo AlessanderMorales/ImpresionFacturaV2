@@ -1,32 +1,32 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f7f9;
-    color: #333;
+  background-color: #121212; /* Fondo oscuro */
+  color: #f5f5f5;            /* Texto claro */
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-    max-width: 1000px;
-    margin: auto;
-    background-color: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  max-width: 1000px;
+  margin: auto;
+  background-color: #1e1e1e; /* Fondo gris oscuro */
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
 h1, h2 {
-    font-family: 'Poppins', sans-serif;
-    color: #0357ac;
-    border-bottom: 2px solid #0099cc;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #4fc3f7; /* Azul celeste claro */
+  border-bottom: 2px solid #0099cc;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 p, label, span, input, td, li {
   font-family: 'Roboto', sans-serif;
+  color: #e0e0e0; /* Gris claro */
 }
-
 
 .grid {
     display: grid;
@@ -36,12 +36,12 @@ p, label, span, input, td, li {
 
 /* Secciones */
 .section {
-    padding: 20px;
-    border: 1px solid #e0e6ed;
-    border-radius: 8px;
-    background-color: #fafafa;
-    margin-bottom: 20px;
-    transition: box-shadow 0.3s;
+  padding: 20px;
+  border: 1px solid #333; 
+  border-radius: 8px;
+  background-color: #1c1c1c; /* Secciones oscuras */
+  margin-bottom: 20px;
+  transition: box-shadow 0.3s;
 }
 .section:hover {
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
@@ -49,18 +49,20 @@ p, label, span, input, td, li {
 
 /* Botones generales */
 button {
-    background-color: #00aaff; /* Celeste */
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    font-size: 14px;
+  background-color: #0099cc;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  font-size: 14px;
 }
+
+
 button:hover {
-    background-color: #008ecc; /* Azul más fuerte */
-    transform: scale(1.05);
+  background-color: #0077aa;
+  transform: scale(1.05);
 }
 
 /* Botones de navegación */
@@ -85,19 +87,27 @@ button:hover {
 /* Inputs */
 input[type="text"],
 input[type="number"] {
-    width: 100%;
-    padding: 10px;
-    margin-top: 6px;
-    border: 1px solid #ccd6dd;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: border 0.3s, box-shadow 0.3s;
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #2a2a2a; /* Fondo oscuro */
+  color: #f5f5f5;
 }
+
+input[type="text"]::placeholder,
+input[type="number"]::placeholder {
+  color: #aaa; /* Placeholder gris */
+}
+
+
 input[type="text"]:focus,
 input[type="number"]:focus {
-    border: 1px solid #0099cc;
-    box-shadow: 0 0 5px rgba(0,153,204,0.3);
-    outline: none;
+  border: 1px solid #4fc3f7;
+  box-shadow: 0 0 5px rgba(79,195,247,0.6);
+  outline: none;
 }
 
 /* Lista de productos */
@@ -108,43 +118,49 @@ input[type="number"]:focus {
 
 /* Carrito */
 .cart-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
 }
+
 #cart-total {
-    text-align: right;
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-top: 10px;
-    color: #0077aa;
+  text-align: right;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-top: 10px;
+  color: #4fc3f7;
 }
 
 /* Factura */
 #factura-resultado {
-    margin-top: 20px;
-    background-color: #eef8fb;
-    padding: 20px;
-    border-radius: 8px;
-    white-space: pre-wrap;
-    font-family: 'Courier New', Courier, monospace;
-    border: 1px solid #cce7f0;
+  margin-top: 20px;
+  background-color: #1b2a2f;
+  padding: 20px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+  border: 1px solid #444;
+  color: #f5f5f5;
 }
+
 #factura-qr-display {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #ddd;
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #444;
 }
+
+
 #factura-qr-image {
-    width: 120px;
-    height: 120px;
-    border: 1px solid #ccc;
-    padding: 5px;
-    background-color: white;
-    border-radius: 6px;
+  width: 120px;
+  height: 120px;
+  border: 1px solid #666;
+  padding: 5px;
+  background-color: #222;
+  border-radius: 6px;
 }
+
 
 /* Facturas anteriores */
 #client-invoices-result ul {
@@ -152,18 +168,22 @@ input[type="number"]:focus {
     padding: 0;
 }
 #client-invoices-result li {
-    background-color: #f9f9f9;
-    border: 1px solid #eee;
-    margin-bottom: 10px;
-    padding: 12px;
-    border-radius: 6px;
+  background-color: #1c1c1c;
+  border: 1px solid #333;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 6px;
+  color: #e0e0e0;
 }
+
 #client-invoices-result li details {
     margin-top: 8px;
 }
+
 #client-invoices-result li pre {
-    background-color: #eef8fb;
-    padding: 10px;
-    border-radius: 6px;
-    overflow-x: auto;
+  background-color: #2a2a2a;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  color: #f5f5f5;
 }
