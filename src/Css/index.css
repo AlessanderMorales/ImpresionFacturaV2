@@ -16,11 +16,17 @@ body {
 }
 
 h1, h2 {
-    color: #2c3e50;
+    font-family: 'Poppins', sans-serif;
+    color: #0357ac;
     border-bottom: 2px solid #0099cc;
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
+
+p, label, span, input, td, li {
+  font-family: 'Roboto', sans-serif;
+}
+
 
 .grid {
     display: grid;
