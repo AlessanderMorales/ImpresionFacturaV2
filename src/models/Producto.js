@@ -1,11 +1,32 @@
 export class Producto {
     constructor(id, nombre, precio) {
-        if (typeof id !== 'number' || id <= 0) throw new Error("ID de producto inválido.");
-        if (!nombre || typeof nombre !== 'string') throw new Error("Nombre de producto inválido.");
-        if (typeof precio !== 'number' || precio <= 0) throw new Error("Precio de producto inválido.");
+        Producto.validarId(id);
+        Producto.validarNombre(nombre);
+        Producto.validarPrecio(precio);
 
         this.id = id;
-        this.nombre = nombre;
+        this.nombre = nombre.trim(); // Se añade trim por si el nombre tiene espacios iniciales/finales
         this.precio = precio;
+    }
+
+    static validarId(id) {
+        if (typeof id !== 'number' || !Number.isInteger(id) || id <= 0) {
+            throw new Error("ID de producto inválido. Debe ser un número entero positivo.");
+        }
+    }
+
+    static validarNombre(nombre) {
+        if (typeof nombre !== 'string' || nombre.trim() === '') {
+            throw new Error("Nombre de producto inválido. Debe ser una cadena de texto no vacía.");
+        }
+        if (/^\d+$/.test(nombre.trim())) {
+            throw new Error("Nombre de producto no puede consistir únicamente en números.");
+        }
+    }
+
+    static validarPrecio(precio) {
+        if (typeof precio !== 'number' || precio <= 0) {
+            throw new Error("Precio de producto inválido. Debe ser un número positivo.");
+        }
     }
 }

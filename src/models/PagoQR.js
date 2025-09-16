@@ -2,8 +2,21 @@ import { Pago } from './Pago.js';
 
 export class PagoQR extends Pago {
     constructor(monto, montoEnLetras, codigoQR = null) {
-        super(monto, montoEnLetras);
-        this.codigoQR = codigoQR || this.generarQR(); 
+        super(monto, montoEnLetras); 
+
+        
+        if (codigoQR !== null && codigoQR !== undefined) {
+            PagoQR.validarCodigoQR(codigoQR);
+        }
+        
+        this.codigoQR = codigoQR || this.generarQR();
+    }
+
+    static validarCodigoQR(codigoQR) {
+        if (typeof codigoQR !== 'string' || codigoQR.trim() === '') {
+            throw new Error("Código QR inválido. Debe ser una cadena de texto no vacía si se proporciona.");
+        }
+      
     }
 
     generarQR() {
