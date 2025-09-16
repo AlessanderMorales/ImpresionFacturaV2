@@ -3,7 +3,11 @@ import { Producto } from './src/models/Producto.js';
 import { Tienda } from './src/models/Tienda.js';
 import { ProductoService } from './src/services/ProductoService.js';
 import { TiendaService } from './src/services/TiendaService.js';
-import { FacturaService } from './src/services/FacturaService.js'; // NEW: Import FacturaService
+import { FacturaService } from './src/services/FacturaService.js'; 
+import { PagoCash } from './src/models/PagoCash.js';
+import { PagoQR } from './src/models/PagoQR.js';
+import { PagoTarjeta } from './src/models/PagoTarjeta.js';
+const { jsPDF } = window.jspdf;
 
 // Elementos de la UI para datos de la tienda
 const adminNombreTiendaInput = document.getElementById('admin-nombre-tienda');
@@ -150,10 +154,10 @@ function limpiarFormularioProducto() {
     btnGuardarProducto.textContent = 'Guardar Producto';
 }
 
-// NEW: Invoice Administration Functions
+
 
 function renderizarFacturasAdmin(facturas) {
-    adminInvoiceListDiv.innerHTML = ''; // Clear previous results
+    adminInvoiceListDiv.innerHTML = '';
 
     if (facturas.length === 0) {
         adminInvoiceListDiv.innerHTML = '<p>No se encontraron facturas con los criterios de búsqueda.</p>';
@@ -162,8 +166,7 @@ function renderizarFacturasAdmin(facturas) {
 
     const ul = document.createElement('ul');
     facturas.forEach(factura => {
-        // Asegurarse de que factura es una instancia completa con sus métodos
-        const facturaDetalles = factura.obtenerDetalles(); // Obtener detalles completos
+        const facturaDetalles = factura.obtenerDetalles(); 
         
         const li = document.createElement('li');
         li.className = 'invoice-item';
@@ -174,6 +177,7 @@ function renderizarFacturasAdmin(facturas) {
                 Cliente: ${facturaDetalles.cliente.nombreYApellido} (NIT: ${facturaDetalles.cliente.nit})
                 <br>
                 Total: Bs. ${facturaDetalles.total.toFixed(2)} (Pago: ${facturaDetalles.tipoDePago})
+                <button class="btn-descargar-pdf" data-factura-id="${factura.numero_factura}">Descargar PDF</button>
             </div>
             <details class="invoice-details">
                 <summary>Ver Detalles Completos</summary>
@@ -183,6 +187,30 @@ function renderizarFacturasAdmin(facturas) {
         ul.appendChild(li);
     });
     adminInvoiceListDiv.appendChild(ul);
+
+   document.querySelectorAll('.btn-descargar-pdf').forEach(button => {
+        button.addEventListener('click', (event) => {
+            console.log("Botón Descargar PDF clickeado."); 
+
+            const facturaIdString = event.target.dataset.facturaId;
+          
+            const facturaId = parseInt(facturaIdString, 10);
+            console.log(`Intentando buscar factura con ID (numérico): ${facturaId}`); 
+
+            const todasLasFacturas = FacturaService.obtenerTodasLasFacturas();
+            console.log(`Total de facturas cargadas: ${todasLasFacturas.length}`); 
+        
+            const facturaParaDescargar = todasLasFacturas.find(f => parseInt(f.numero_factura, 10) === facturaId);
+
+            if (facturaParaDescargar) {
+                console.log(`Factura encontrada: ${facturaParaDescargar.numero_factura}`); 
+                generarPdfFactura(facturaParaDescargar);
+            } else {
+                alert('No se pudo encontrar la factura para descargar.');
+                console.error(`Factura con ID ${facturaId} (numérico) no encontrada.`); 
+            }
+        });
+    });
 }
 
 function buscarFacturasAdmin() {
@@ -192,17 +220,17 @@ function buscarFacturasAdmin() {
     const todasLasFacturas = FacturaService.obtenerTodasLasFacturas();
 
     if (searchTerm === '') {
-        // If search term is empty, show all invoices
+        
         facturasFiltradas = todasLasFacturas;
     } else {
-        // Try to parse as number for NIT search
+       
         const nitSearch = parseInt(searchTerm, 10);
         if (!isNaN(nitSearch) && nitSearch > 0) {
             facturasFiltradas = todasLasFacturas.filter(factura =>
                 factura.cliente && factura.cliente.nit === nitSearch
             );
         } else {
-            // General text search (e.g., by client name or invoice number string)
+            
             const lowerCaseSearchTerm = searchTerm.toLowerCase();
             facturasFiltradas = todasLasFacturas.filter(factura =>
                 String(factura.numero_factura).includes(lowerCaseSearchTerm) ||
@@ -214,6 +242,159 @@ function buscarFacturasAdmin() {
     renderizarFacturasAdmin(facturasFiltradas);
 }
 
+
+function generarPdfFactura(factura) {
+    try {
+        const doc = new jsPDF();
+        const margin = 15;
+        let y = margin;
+        const lineHeight = 7;
+        const maxWidth = doc.internal.pageSize.getWidth() - 2 * margin;
+
+        
+        if (!factura) {
+            console.error("Error: La factura proporcionada es undefined o null.");
+            alert("No se puede generar el PDF: La factura no es válida.");
+            return;
+        }
+        if (!factura.tienda) {
+            console.error("Error: Los datos de la tienda en la factura son undefined o null.", factura);
+            alert("No se puede generar el PDF: Faltan datos de la tienda.");
+            return;
+        }
+        if (!factura.cliente) {
+            console.error("Error: Los datos del cliente en la factura son undefined o null.", factura);
+            alert("No se puede generar el PDF: Faltan datos del cliente.");
+            return;
+        }
+        if (!factura.venta || !factura.venta.items || factura.venta.items.length === 0) {
+            console.error("Error: La venta o los items de venta en la factura son inválidos o están vacíos.", factura);
+            alert("No se puede generar el PDF: Faltan productos en la factura.");
+            return;
+        }
+        
+        if (!(factura.fecha instanceof Date)) {
+            console.error("Error: factura.fecha no es un objeto Date. Intentando convertir...", factura.fecha);
+            factura.fecha = new Date(factura.fecha);
+            if (isNaN(factura.fecha.getTime())) { 
+                alert("No se puede generar el PDF: La fecha de la factura no es válida.");
+                return;
+            }
+        }
+
+
+        
+        doc.setFontSize(22);
+        doc.text("FACTURA", doc.internal.pageSize.getWidth() / 2, y, { align: "center" });
+        y += lineHeight * 2;
+
+        doc.setFontSize(10);
+        doc.text(`Nº de Factura: ${factura.numero_factura}`, margin, y);
+        y += lineHeight;
+        doc.text(`Fecha: ${factura.fecha.toLocaleDateString()} ${factura.fecha.toLocaleTimeString()}`, margin, y);
+        y += lineHeight * 2;
+
+       
+        doc.setFontSize(12);
+        doc.text("Datos de la Tienda:", margin, y);
+        y += lineHeight;
+        doc.setFontSize(10);
+        doc.text(`Nombre: ${factura.tienda.nombre_tienda}`, margin, y);
+        y += lineHeight;
+        doc.text(`NIT: ${factura.tienda.nit}`, margin, y);
+        y += lineHeight;
+        doc.text(`Ubicación: ${factura.tienda.ubicacion}`, margin, y);
+        y += lineHeight;
+        doc.text(`Teléfono: ${factura.tienda.telefono}`, margin, y);
+        y += lineHeight * 2;
+
+        
+        doc.setFontSize(12);
+        doc.text("Datos del Cliente:", margin, y);
+        y += lineHeight;
+        doc.setFontSize(10);
+        doc.text(`Nombre: ${factura.cliente.nombreYApellido}`, margin, y);
+        y += lineHeight;
+        doc.text(`NIT/CI: ${factura.cliente.nit}`, margin, y);
+        y += lineHeight * 2;
+
+       
+        doc.setFontSize(12);
+        doc.text("Detalle de la Venta:", margin, y);
+        y += lineHeight;
+        doc.setFontSize(10);
+
+       
+        const colCantidad = margin;
+        const colProducto = margin + 20; 
+        const colPrecioUnitario = margin + 100; 
+        const colSubtotal = margin + 140; 
+
+        doc.text("Cant.", colCantidad, y);
+        doc.text("Producto", colProducto, y);
+        doc.text("P. Unit.", colPrecioUnitario, y);
+        doc.text("Subtotal", colSubtotal, y);
+        y += lineHeight;
+        doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y); 
+        y += 2; 
+
+        
+        factura.venta.items.forEach(item => {
+            if (y > doc.internal.pageSize.getHeight() - margin - (lineHeight * 3)) { 
+                doc.addPage();
+                y = margin;
+                doc.setFontSize(10);
+                doc.text("Cant.", colCantidad, y);
+                doc.text("Producto", colProducto, y);
+                doc.text("P. Unit.", colPrecioUnitario, y);
+                doc.text("Subtotal", colSubtotal, y);
+                y += lineHeight;
+                doc.line(margin, y, doc.internal.pageSize.getWidth() - margin, y);
+                y += 2;
+            }
+
+            doc.text(String(item.cantidad), colCantidad, y);
+            doc.text(item.producto.nombre, colProducto, y);
+            doc.text(`Bs. ${item.producto.precio.toFixed(2)}`, colPrecioUnitario, y);
+            doc.text(`Bs. ${item.subtotal.toFixed(2)}`, colSubtotal, y);
+            y += lineHeight;
+        });
+
+        y += lineHeight;
+        doc.setFontSize(12);
+        doc.text(`Total: Bs. ${factura.total.toFixed(2)}`, margin, y);
+        y += lineHeight;
+        const montoEnLetras = factura.pago && factura.pago.montoEnLetras ? factura.pago.montoEnLetras : "Monto en letras no disponible";
+        doc.text(`Monto en letras: ${montoEnLetras}`, margin, y, { maxWidth: maxWidth });
+        y += lineHeight;
+
+        let tipoDePago = "Desconocido";
+        if (factura.pago) {
+            if (factura.pago instanceof PagoTarjeta) {
+                tipoDePago = 'Tarjeta';
+            } else if (factura.pago instanceof PagoQR) {
+                tipoDePago = 'QR';
+            } else if (factura.pago instanceof PagoCash) {
+                tipoDePago = 'Efectivo';
+            } else if (factura.pago.tipo) {
+                tipoDePago = factura.pago.tipo;
+            }
+        }
+        doc.text(`Tipo de Pago: ${tipoDePago}`, margin, y);
+        y += lineHeight * 3;
+
+        doc.setFontSize(10);
+        doc.text("¡Gracias por su compra!", doc.internal.pageSize.getWidth() / 2, y, { align: "center" });
+
+        // Guardar el PDF
+        doc.save(`factura_${factura.numero_factura}.pdf`);
+        console.log(`PDF de factura ${factura.numero_factura} generado y descargado.`);
+
+    } catch (error) {
+        console.error("Error al generar el PDF de la factura:", error);
+        alert(`Ocurrió un error al intentar descargar la factura: ${error.message}. Revise la consola para más detalles.`);
+    }
+}
 
 // Event Listeners
 btnGuardarTienda.addEventListener('click', guardarDatosTienda);
