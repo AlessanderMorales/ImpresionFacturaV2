@@ -5,7 +5,7 @@ export class Venta {
         this.items = [];
     }
 
-    agregarItem(item) {
+    agregar_item(item) {
         Venta.validarItemParaAgregar(item);
         this.items.push(item);
     }
@@ -16,7 +16,7 @@ export class Venta {
         }
     }
 
-    calcularTotal() {
-        return this.items.reduce((total, item) => total + item.calcularSubtotal(), 0);
+    calcular_total() {
+        return this.items.reduce((total, item) => total + item.calcular_subtotal(), 0);
     }
 }

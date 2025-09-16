@@ -32,7 +32,7 @@ export class Tienda {
         if (typeof telefono !== 'number' || !Number.isInteger(telefono) || telefono <= 0) {
             throw new Error("Teléfono de tienda inválido. Debe ser un número entero positivo.");
         }
-       
+        
     }
 
     static validarCodigoAutorizacion(codigo_autorizacion) {

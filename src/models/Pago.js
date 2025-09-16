@@ -1,17 +1,14 @@
 export class Pago {
-    constructor(monto, montoEnLetras) {
-        Pago.validarInstanciacionAbstracta(new.target);
-        Pago.validarMonto(monto);
-        Pago.validarMontoEnLetras(montoEnLetras);
-
-        this.monto = monto;
-        this.montoEnLetras = montoEnLetras;
-    }
-
-    static validarInstanciacionAbstracta(target) {
-        if (target === Pago) {
+    constructor(monto, monto_en_letras) {
+        if (new.target === Pago) {
             throw new Error("La clase 'Pago' es abstracta y no puede ser instanciada directamente.");
         }
+        
+        Pago.validarMonto(monto);
+        Pago.validarMontoEnLetras(monto_en_letras);
+
+        this.monto = monto;
+        this.monto_en_letras = monto_en_letras;
     }
 
     static validarMonto(monto) {
@@ -20,17 +17,13 @@ export class Pago {
         }
     }
 
-    static validarMontoEnLetras(montoEnLetras) {
-        if (typeof montoEnLetras !== 'string' || montoEnLetras.trim() === '') {
+    static validarMontoEnLetras(monto_en_letras) {
+        if (typeof monto_en_letras !== 'string' || monto_en_letras.trim() === '') {
             throw new Error("El monto en letras del pago es inválido. No puede estar vacío.");
         }
     }
 
-    realizarPago() {
-        Pago.validarImplementacionMetodo('realizarPago');
-    }
-
-    static validarImplementacionMetodo(nombreMetodo) {
-        throw new Error(`El método '${nombreMetodo}()' debe ser implementado por las subclases de Pago.`);
+    realizar_pago() {
+        throw new Error("El método 'realizar_pago()' debe ser implementado por las subclases de Pago.");
     }
 }

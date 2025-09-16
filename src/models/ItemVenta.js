@@ -1,4 +1,4 @@
-import { Producto } from './Producto.js'; // Asegúrate de que Producto tenga sus propias validaciones
+import { Producto } from './Producto.js';
 
 export class ItemVenta {
     constructor(cantidad, producto) {
@@ -7,7 +7,7 @@ export class ItemVenta {
 
         this.cantidad = cantidad;
         this.producto = producto;
-        this.subtotal = this.calcularSubtotal();
+        this.subtotal = this.calcular_subtotal();
     }
 
     static validarCantidad(cantidad) {
@@ -22,7 +22,7 @@ export class ItemVenta {
         }
     }
 
-    calcularSubtotal() {
+    calcular_subtotal() {
         return this.cantidad * this.producto.precio;
     }
 }

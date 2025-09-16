@@ -1,4 +1,3 @@
-// src/services/FacturaService.js
 import { Factura } from '../models/Factura.js';
 import { Venta } from '../models/Venta.js';
 import { ItemVenta } from '../models/ItemVenta.js';
@@ -8,13 +7,12 @@ import { PagoQR } from '../models/PagoQR.js';
 import { PagoTarjeta } from '../models/PagoTarjeta.js';
 import { Tienda } from '../models/Tienda.js';
 import { Cliente } from '../models/Cliente.js';
-import { Pago } from '../models/Pago.js'; // Importa la clase base Pago
+import { Pago } from '../models/Pago.js';
 
 export class FacturaService {
 
     static guardarFactura(factura) {
         const facturasExistentes = JSON.parse(localStorage.getItem('facturas') || '[]');
-        // Al guardar, solo necesitamos los datos planos para serializar correctamente
         facturasExistentes.push({
             numero_factura: factura.numero_factura,
             fecha: factura.fecha.toISOString(),
@@ -31,11 +29,10 @@ export class FacturaService {
             },
             pago: {
                 monto: factura.pago.monto,
-                montoEnLetras: factura.pago.montoEnLetras,
-                // Guardar propiedades específicas del tipo de pago
-                ...(factura.pago instanceof PagoTarjeta && { numeroTarjeta: factura.pago.numeroTarjeta }),
-                ...(factura.pago instanceof PagoQR && { tipo: 'QR' }), // Marcar QR explícitamente si es necesario
-                ...(factura.pago instanceof PagoCash && { tipo: 'CASH' }) // Marcar CASH explícitamente
+                monto_en_letras: factura.pago.monto_en_letras,
+                ...(factura.pago instanceof PagoTarjeta && { numero_tarjeta: factura.pago.numero_tarjeta }),
+                ...(factura.pago instanceof PagoQR && { tipo: 'QR' }),
+                ...(factura.pago instanceof PagoCash && { tipo: 'CASH' })
             },
             tienda: {
                 nombre_tienda: factura.tienda.nombre_tienda,
@@ -55,7 +52,6 @@ export class FacturaService {
         localStorage.setItem('facturas', JSON.stringify(facturasExistentes));
     }
 
-    // Método auxiliar para reconstruir una factura desde datos JSON
     static reconstruirFactura(facturaData) {
         const cliente = new Cliente(facturaData.cliente.id, facturaData.cliente.nombreYApellido, facturaData.cliente.nit);
         const tienda = new Tienda(
@@ -69,21 +65,19 @@ export class FacturaService {
         facturaData.venta.items.forEach(itemData => {
             const producto = new Producto(itemData.producto.id, itemData.producto.nombre, itemData.producto.precio);
             const itemVenta = new ItemVenta(itemData.cantidad, producto);
-            venta.agregarItem(itemVenta);
+            venta.agregar_item(itemVenta);
         });
 
         let pago;
-        // Reconstrucción inteligente del objeto de pago
-        if (facturaData.pago.numeroTarjeta) {
-            pago = new PagoTarjeta(facturaData.pago.monto, facturaData.pago.montoEnLetras, facturaData.pago.numeroTarjeta);
+        if (facturaData.pago.numero_tarjeta) {
+            pago = new PagoTarjeta(facturaData.pago.monto, facturaData.pago.monto_en_letras, facturaData.pago.numero_tarjeta);
         } else if (facturaData.pago.tipo === 'QR') {
-            pago = new PagoQR(facturaData.pago.monto, facturaData.pago.montoEnLetras);
+            pago = new PagoQR(facturaData.pago.monto, facturaData.pago.monto_en_letras);
         } else if (facturaData.pago.tipo === 'CASH') {
-            pago = new PagoCash(facturaData.pago.monto, facturaData.pago.montoEnLetras);
+            pago = new PagoCash(facturaData.pago.monto, facturaData.pago.monto_en_letras);
         } else {
-            // Fallback si el tipo no está claramente definido, asumir Cash por defecto o manejar error
             console.warn("Tipo de pago desconocido, se asume PagoCash.");
-            pago = new PagoCash(facturaData.pago.monto, facturaData.pago.montoEnLetras);
+            pago = new PagoCash(facturaData.pago.monto, facturaData.pago.monto_en_letras);
         }
 
         const facturaCompleta = new Factura(
@@ -94,8 +88,8 @@ export class FacturaService {
             tienda,
             cliente
         );
-        facturaCompleta.total = facturaData.total; // Restaurar total si se guardó por separado
-        facturaCompleta.facturaOnline = facturaData.facturaOnline; // Restaurar facturaOnline
+        facturaCompleta.total = facturaData.total;
+        facturaCompleta.facturaOnline = facturaData.facturaOnline;
         
         return facturaCompleta;
     }

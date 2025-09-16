@@ -3,7 +3,6 @@ import { Producto } from '../models/Producto.js';
 
 const PRODUCTOS_STORAGE_KEY = 'productos_tienda';
 
-// Función para inicializar productos en localStorage si no existen
 function inicializarProductos() {
     let productos = JSON.parse(localStorage.getItem(PRODUCTOS_STORAGE_KEY));
     if (!productos || productos.length === 0) {
@@ -11,7 +10,7 @@ function inicializarProductos() {
     }
 }
 
-inicializarProductos(); // Llama a la inicialización al cargar el script
+inicializarProductos();
 
 export class ProductoService {
     static obtenerTodosLosProductos() {
@@ -25,7 +24,6 @@ export class ProductoService {
         return productoData ? new Producto(productoData.id, productoData.nombre, productoData.precio) : undefined;
     }
 
-    // Nuevo: Agregar un producto
     static agregarProducto(producto) {
         const productos = ProductoService.obtenerTodosLosProductos();
         if (productos.find(p => p.id === producto.id)) {
@@ -35,7 +33,6 @@ export class ProductoService {
         localStorage.setItem(PRODUCTOS_STORAGE_KEY, JSON.stringify(productos));
     }
 
-    // Nuevo: Actualizar un producto existente
     static actualizarProducto(productoActualizado) {
         let productos = ProductoService.obtenerTodosLosProductos();
         const index = productos.findIndex(p => p.id === productoActualizado.id);
@@ -46,7 +43,6 @@ export class ProductoService {
         localStorage.setItem(PRODUCTOS_STORAGE_KEY, JSON.stringify(productos));
     }
 
-    // Nuevo: Eliminar un producto
     static eliminarProducto(id) {
         let productos = ProductoService.obtenerTodosLosProductos();
         const productosFiltrados = productos.filter(p => p.id !== id);
@@ -56,11 +52,10 @@ export class ProductoService {
         localStorage.setItem(PRODUCTOS_STORAGE_KEY, JSON.stringify(productosFiltrados));
     }
 
-    // Nuevo: Generar un nuevo ID único para productos
     static generarNuevoIdProducto() {
         const productos = ProductoService.obtenerTodosLosProductos();
         if (productos.length === 0) {
-            return 101; // Primer ID si no hay productos
+            return 101;
         }
         const maxId = Math.max(...productos.map(p => p.id));
         return maxId + 1;

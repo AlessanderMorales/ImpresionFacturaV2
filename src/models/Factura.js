@@ -1,5 +1,5 @@
 import { Venta } from "./Venta.js";
-import { Pago } from "./Pago.js"; // Importa la clase base Pago
+import { Pago } from "./Pago.js";
 import { Tienda } from "./Tienda.js";
 import { Cliente } from "./Cliente.js";
 
@@ -18,7 +18,7 @@ export class Factura {
         this.pago = pago;
         this.tienda = tienda;
         this.cliente = cliente;
-        this.total = venta.calcularTotal(); // Asume que venta.calcularTotal() funciona correctamente
+        this.total = venta.calcular_total();
         this.facturaOnline = this.generarFacturaOnline();
     }
 
@@ -41,7 +41,6 @@ export class Factura {
     }
 
     static validarPago(pago) {
-        // Usa `instanceof Pago` para permitir instancias de Pago o sus subclases
         if (!(pago instanceof Pago)) {
             throw new Error("Pago inválido. Debe ser una instancia de la clase Pago o sus subclases.");
         }

@@ -5,7 +5,7 @@ export class Producto {
         Producto.validarPrecio(precio);
 
         this.id = id;
-        this.nombre = nombre.trim(); // Se añade trim por si el nombre tiene espacios iniciales/finales
+        this.nombre = nombre.trim();
         this.precio = precio;
     }
 

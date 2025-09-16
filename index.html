@@ -1,102 +1,98 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Facturas</title>
-   <link rel="stylesheet" href="/src/Css/index.css"> <!-- Vinculamos el CSS externo -->
-   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Facturas</title>
+<link rel="stylesheet" href="/src/Css/index.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <!-- BOTONES DE NAVEGACIÓN AÑADIDOS AQUÍ -->
-        <div class="nav-buttons">
-            <button onclick="window.location.href='index.html'">Volver a Facturación</button>
-            <button onclick="window.location.href='admin.html'">Administración</button>
+<div class="container">
+<div class="nav-buttons">
+<button onclick="window.location.href='index.html'">Volver a Facturación</button>
+<button onclick="window.location.href='admin.html'">Administración</button>
+</div>
+
+<h1>Sistema de Facturación</h1>
+    
+    <div class="grid">
+        <div>
+            <div class="section">
+                <h2>Productos Disponibles</h2>
+                <div id="product-list" class="product-list"></div>
+            </div>
+
+            <div class="section">
+                <h2>Carrito de Compras</h2>
+                <div id="cart-items">
+                    <p>El carrito está vacío.</p>
+                </div>
+                <div id="cart-total">Total: Bs. 0.00</div>
+            </div>
+
+            <div id="client-past-invoices-section" class="section">
+                <h2>Mis Facturas Anteriores</h2>
+                <div>
+                    <label for="client-view-nit">Ingrese su NIT / CI para ver facturas:</label>
+                    <input type="number" id="client-view-nit" placeholder="Ej: 1234567" style="width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <button id="btn-view-client-invoices" style="background-color: #28a745; margin-top: 10px;">Ver Mis Facturas</button>
+                <div id="client-invoices-result" style="margin-top: 15px;">
+                </div>
+            </div>
         </div>
 
-        <h1>Sistema de Facturación</h1>
-        
-        <div class="grid">
-            <div>
-                <div class="section">
-                    <h2>Productos Disponibles</h2>
-                    <div id="product-list" class="product-list"></div>
+        <div>
+            <div class="section">
+                <h2>Datos del Cliente</h2>
+                <div>
+                    <label for="cliente-nombre">Nombre y Apellido:</label>
+                    <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" style="width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
-
-                <div class="section">
-                    <h2>Carrito de Compras</h2>
-                    <div id="cart-items">
-                        <p>El carrito está vacío.</p>
-                    </div>
-                    <div id="cart-total">Total: Bs. 0.00</div>
-                </div>
-
-                <!-- NEW SECTION: Client Past Invoices -->
-                <div id="client-past-invoices-section" class="section">
-                    <h2>Mis Facturas Anteriores</h2>
-                    <div>
-                        <label for="client-view-nit">Ingrese su NIT / CI para ver facturas:</label>
-                        <input type="number" id="client-view-nit" placeholder="Ej: 1234567" style="width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                    </div>
-                    <button id="btn-view-client-invoices" style="background-color: #28a745; margin-top: 10px;">Ver Mis Facturas</button>
-                    <div id="client-invoices-result" style="margin-top: 15px;">
-                        <!-- Client's past invoices will be displayed here -->
-                    </div>
+                <div style="margin-top: 10px;">
+                    <label for="cliente-nit">NIT / CI:</label>
+                    <input type="number" id="cliente-nit" placeholder="Ej: 1234567" style="width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
             </div>
 
-            <div>
-                <div class="section">
-                    <h2>Datos del Cliente</h2>
-                    <div>
-                        <label for="cliente-nombre">Nombre y Apellido:</label>
-                        <input type="text" id="cliente-nombre" placeholder="Ej: Juan Pérez" style="width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <label for="cliente-nit">NIT / CI:</label>
-                        <input type="number" id="cliente-nit" placeholder="Ej: 1234567" style="width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                    </div>
+            <div class="section payment-options">
+                <h2>Método de Pago</h2>
+                <label>
+                    <input type="radio" name="metodoPago" value="cash" checked> Efectivo
+                </label>
+                <label>
+                    <input type="radio" name="metodoPago" value="tarjeta"> Tarjeta de Crédito/Débito
+                </label>
+                <div id="tarjeta-info" style="display: none;">
+                    <input type="text" id="numeroTarjeta" placeholder="Ingrese número de tarjeta">
                 </div>
-
-                <div class="section payment-options">
-                    <h2>Método de Pago</h2>
-                    <label>
-                        <input type="radio" name="metodoPago" value="cash" checked> Efectivo
-                    </label>
-                    <label>
-                        <input type="radio" name="metodoPago" value="tarjeta"> Tarjeta de Crédito/Débito
-                    </label>
-                    <div id="tarjeta-info" style="display: none;">
-                        <input type="text" id="numeroTarjeta" placeholder="Ingrese número de tarjeta">
-                    </div>
-                    <label style="margin-top: 10px;">
-                        <input type="radio" name="metodoPago" value="qr"> QR
-                    </label>
-                    <div id="qr-info" style="display: none; text-align: center; margin-top: 15px;">
-                        <p>Escanee el siguiente QR para completar su pago:</p>
-                        <img id="qr-image" src="" alt="Código QR de Pago" style="width: 150px; height: 150px; border: 1px solid #ccc; padding: 10px; background-color: white;">
-                        <p style="font-size: 0.8em; color: #777;">(QR ficticio para demostración)</p>
-                    </div>
+                <label style="margin-top: 10px;">
+                    <input type="radio" name="metodoPago" value="qr"> QR
+                </label>
+                <div id="qr-info" style="display: none; text-align: center; margin-top: 15px;">
+                    <p>Escanee el siguiente QR para completar su pago:</p>
+                    <img id="qr-image" src="" alt="Código QR de Pago" style="width: 150px; height: 150px; border: 1px solid #ccc; padding: 10px; background-color: white;">
+                    <p style="font-size: 0.8em; color: #777;">(QR ficticio para demostración)</p>
                 </div>
-                
-                <button id="btn-generar-factura">Generar Factura</button>
+            </div>
+            
+            <button id="btn-generar-factura">Generar Factura</button>
 
-                <div id="factura-container" class="section" style="margin-top: 20px; display: none;">
-                    <h2>Factura Generada</h2>
-                    <pre id="factura-resultado"></pre>
-                    <div id="factura-qr-display" style="display: none;">
-                        <p>Escanee este QR para ver la factura online:</p>
-                        <img id="factura-qr-image" src="" alt="QR Factura Online">
-                        <p style="font-size: 0.8em; color: #777;">(QR ficticio de factura online)</p>
-                    </div>
+            <div id="factura-container" class="section" style="margin-top: 20px; display: none;">
+                <h2>Factura Generada</h2>
+                <pre id="factura-resultado"></pre>
+                <div id="factura-qr-display" style="display: none;">
+                    <p>Escanee este QR para ver la factura online:</p>
+                    <img id="factura-qr-image" src="" alt="QR Factura Online">
+                    <p style="font-size: 0.8em; color: #777;">(QR ficticio de factura online)</p>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script type="module" src="./presenter.js"></script>
+<script type="module" src="./presenter.js"></script>
 </body>
 </html>
