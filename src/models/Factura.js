@@ -68,11 +68,19 @@ export class Factura {
             numero_factura: this.numero_factura,
             fecha: this.fecha.toISOString(),
             total: this.total,
-            // Asegúrate de que pago.realizarPago() devuelva algo sensato para la información.
-            pagoRealizado: this.pago.realizarPago(), 
-            tipoDePago: this.pago.constructor.name,
-            tienda: this.tienda,
-            cliente: this.cliente,
+            tipoDePago: this.pago.constructor.name, 
+            tienda: {
+                nombre_tienda: this.tienda.nombre_tienda,
+                ubicacion: this.tienda.ubicacion,
+                telefono: this.tienda.telefono,
+                codigo_autorizacion: this.tienda.codigo_autorizacion,
+                nit: this.tienda.nit
+            },
+            cliente: {
+                id: this.cliente.id,
+                nombreYApellido: this.cliente.nombreYApellido,
+                nit: this.cliente.nit
+            },
             ventaDetalles: this.venta.items.map(item => ({
                 producto: item.producto.nombre,
                 cantidad: item.cantidad,

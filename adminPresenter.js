@@ -116,11 +116,11 @@ function guardarProducto() {
             producto = new Producto(newId, nombre, precio);
             ProductoService.agregarProducto(producto);
         }
-        
+
         alert('Producto guardado exitosamente.');
         limpiarFormularioProducto();
         renderizarProductosAdmin();
-        window.dispatchEvent(new Event('productosActualizados')); 
+        window.dispatchEvent(new Event('productosActualizados'));
 
     } catch (error) {
         alert(`Error al guardar el producto: ${error.message}`);
@@ -162,19 +162,22 @@ function renderizarFacturasAdmin(facturas) {
 
     const ul = document.createElement('ul');
     facturas.forEach(factura => {
+        // Asegurarse de que factura es una instancia completa con sus métodos
+        const facturaDetalles = factura.obtenerDetalles(); // Obtener detalles completos
+        
         const li = document.createElement('li');
         li.className = 'invoice-item';
         li.innerHTML = `
             <div>
-                <b>Factura #${factura.numero_factura}</b> - Fecha: ${new Date(factura.fecha).toLocaleDateString()} ${new Date(factura.fecha).toLocaleTimeString()}
+                <b>Factura #${facturaDetalles.numero_factura}</b> - Fecha: ${new Date(facturaDetalles.fecha).toLocaleDateString()} ${new Date(facturaDetalles.fecha).toLocaleTimeString()}
                 <br>
-                Cliente: ${factura.cliente.nombreYApellido} (NIT: ${factura.cliente.nit})
+                Cliente: ${facturaDetalles.cliente.nombreYApellido} (NIT: ${facturaDetalles.cliente.nit})
                 <br>
-                Total: Bs. ${factura.total.toFixed(2)} (${factura.tipoDePago})
+                Total: Bs. ${facturaDetalles.total.toFixed(2)} (Pago: ${facturaDetalles.tipoDePago})
             </div>
             <details class="invoice-details">
                 <summary>Ver Detalles Completos</summary>
-                <pre>${JSON.stringify(factura.obtenerDetalles(), null, 2)}</pre>
+                <pre>${JSON.stringify(facturaDetalles, null, 2)}</pre>
             </details>
         `;
         ul.appendChild(li);
@@ -195,16 +198,16 @@ function buscarFacturasAdmin() {
         // Try to parse as number for NIT search
         const nitSearch = parseInt(searchTerm, 10);
         if (!isNaN(nitSearch) && nitSearch > 0) {
-            facturasFiltradas = todasLasFacturas.filter(factura => 
-                factura.cliente.nit === nitSearch
+            facturasFiltradas = todasLasFacturas.filter(factura =>
+                factura.cliente && factura.cliente.nit === nitSearch
             );
         } else {
             // General text search (e.g., by client name or invoice number string)
             const lowerCaseSearchTerm = searchTerm.toLowerCase();
-            facturasFiltradas = todasLasFacturas.filter(factura => 
+            facturasFiltradas = todasLasFacturas.filter(factura =>
                 String(factura.numero_factura).includes(lowerCaseSearchTerm) ||
-                factura.cliente.nombreYApellido.toLowerCase().includes(lowerCaseSearchTerm) ||
-                factura.tienda.nombre_tienda.toLowerCase().includes(lowerCaseSearchTerm)
+                (factura.cliente && factura.cliente.nombreYApellido.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (factura.tienda && factura.tienda.nombre_tienda.toLowerCase().includes(lowerCaseSearchTerm))
             );
         }
     }
